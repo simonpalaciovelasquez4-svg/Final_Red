@@ -9,17 +9,30 @@ const enlaces = [
   { to: "/configuracion", texto: "Configuración", icono: "fa-cogs" },
 ];
 
-const cuenta = [
-  { to: "/login", texto: "Iniciar sesión", icono: "fa-sign-in" },
-  { to: "/registro", texto: "Registrarse", icono: "fa-user-plus" },
-];
-
-export default function Navbar() {
+export default function Navbar({ user, onLogout }) {
   const [menuAbierto, setMenuAbierto] = useState(false);
 
   const clase = ({ isActive }) =>
     "w3-bar-item w3-button w3-padding-large w3-hover-white" +
     (isActive ? " w3-theme-d4" : "");
+
+  const cuenta = user
+    ? [
+        {
+          texto: user.nombre ? `Hola, ${user.nombre}` : "Mi cuenta",
+          icono: "fa-user",
+          action: "label",
+        },
+        {
+          texto: "Cerrar sesión",
+          icono: "fa-sign-out",
+          action: "logout",
+        },
+      ]
+    : [
+        { to: "/login", texto: "Iniciar sesión", icono: "fa-sign-in" },
+        { to: "/registro", texto: "Registrarse", icono: "fa-user-plus" },
+      ];
 
   const todos = [...enlaces, ...cuenta];
 
@@ -34,20 +47,48 @@ export default function Navbar() {
             <i className="fa fa-bars"></i>
           </button>
 
-          {todos.map((l) => (
-            <NavLink
-              key={l.to}
-              to={l.to}
-              end={l.end}
-              className={(estado) => clase(estado) + " w3-hide-small"}
-            >
-              <i className={`fa ${l.icono}`}></i> {l.texto}
-            </NavLink>
-          ))}
+          {todos.map((l) => {
+            if (l.action === "logout") {
+              return (
+                <button
+                  key={l.texto}
+                  className="w3-bar-item w3-button w3-padding-large w3-hover-white w3-hide-small"
+                  onClick={() => {
+                    onLogout();
+                    setMenuAbierto(false);
+                  }}
+                  type="button"
+                >
+                  <i className={`fa ${l.icono}`}></i> {l.texto}
+                </button>
+              );
+            }
+
+            if (l.action === "label") {
+              return (
+                <span
+                  key={l.texto}
+                  className="w3-bar-item w3-padding-large w3-hide-small"
+                >
+                  <i className={`fa ${l.icono}`}></i> {l.texto}
+                </span>
+              );
+            }
+
+            return (
+              <NavLink
+                key={l.to}
+                to={l.to}
+                end={l.end}
+                className={(estado) => clase(estado) + " w3-hide-small"}
+              >
+                <i className={`fa ${l.icono}`}></i> {l.texto}
+              </NavLink>
+            );
+          })}
         </div>
       </div>
 
-      {/* Menú para pantallas pequeñas */}
       <div
         className={
           "w3-bar-block w3-theme-d2 w3-large w3-hide-large w3-hide-medium " +
@@ -55,17 +96,43 @@ export default function Navbar() {
         }
         style={{ position: "fixed", top: 46, left: 0, right: 0, zIndex: 3 }}
       >
-        {todos.map((l) => (
-          <NavLink
-            key={l.to}
-            to={l.to}
-            end={l.end}
-            className={clase}
-            onClick={() => setMenuAbierto(false)}
-          >
-            {l.texto}
-          </NavLink>
-        ))}
+        {todos.map((l) => {
+          if (l.action === "logout") {
+            return (
+              <button
+                key={l.texto}
+                className="w3-bar-item w3-button w3-padding-large w3-hover-white"
+                onClick={() => {
+                  onLogout();
+                  setMenuAbierto(false);
+                }}
+                type="button"
+              >
+                <i className={`fa ${l.icono}`}></i> {l.texto}
+              </button>
+            );
+          }
+
+          if (l.action === "label") {
+            return (
+              <span key={l.texto} className="w3-bar-item w3-padding-large">
+                <i className={`fa ${l.icono}`}></i> {l.texto}
+              </span>
+            );
+          }
+
+          return (
+            <NavLink
+              key={l.to}
+              to={l.to}
+              end={l.end}
+              className={clase}
+              onClick={() => setMenuAbierto(false)}
+            >
+              {l.texto}
+            </NavLink>
+          );
+        })}
       </div>
     </>
   );
